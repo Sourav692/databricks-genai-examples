@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Agent Research Assistant – Flow Diagram</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f1117;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+    .subtitle {
+      font-size: 0.9rem;
+      color: #888;
+      margin-bottom: 40px;
+    }
+    .diagram {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      max-width: 900px;
+      width: 100%;
+    }
+
+    /* Nodes */
+    .node {
+      position: relative;
+      border-radius: 14px;
+      padding: 20px 28px;
+      text-align: center;
+      width: 340px;
+      z-index: 1;
+    }
+    .node .label {
+      font-weight: 600;
+      font-size: 1.05rem;
+      margin-bottom: 6px;
+    }
+    .node .desc {
+      font-size: 0.8rem;
+      opacity: 0.75;
+      line-height: 1.4;
+    }
+
+    .node-start {
+      background: #1a1d2e;
+      border: 2px solid #3b82f6;
+      width: 180px;
+    }
+    .node-start .label { color: #60a5fa; }
+
+    .node-end {
+      background: #1a1d2e;
+      border: 2px solid #22c55e;
+      width: 180px;
+    }
+    .node-end .label { color: #4ade80; }
+
+    .node-validator {
+      background: linear-gradient(135deg, #1e1b3a 0%, #2a1f4e 100%);
+      border: 2px solid #8b5cf6;
+    }
+    .node-validator .label { color: #a78bfa; }
+
+    .node-planner {
+      background: linear-gradient(135deg, #1b2e3a 0%, #1a3a4e 100%);
+      border: 2px solid #06b6d4;
+    }
+    .node-planner .label { color: #22d3ee; }
+
+    .node-retrieval {
+      background: linear-gradient(135deg, #1b3a2e 0%, #1a4e3a 100%);
+      border: 2px solid #10b981;
+    }
+    .node-retrieval .label { color: #34d399; }
+
+    .node-response {
+      background: linear-gradient(135deg, #3a2e1b 0%, #4e3a1a 100%);
+      border: 2px solid #f59e0b;
+      width: 260px;
+    }
+    .node-response .label { color: #fbbf24; }
+
+    /* Tools panel */
+    .tools-panel {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 6px;
+    }
+    .tool-chip {
+      font-size: 0.7rem;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #ccc;
+      white-space: nowrap;
+    }
+
+    /* Arrows */
+    .arrow-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      height: 60px;
+      width: 100%;
+    }
+    .arrow-line {
+      width: 2px;
+      flex: 1;
+      background: #444;
+    }
+    .arrow-head {
+      width: 0; height: 0;
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+      border-top: 10px solid #444;
+    }
+    .arrow-label {
+      position: absolute;
+      right: calc(50% - 200px);
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.72rem;
+      color: #999;
+      background: #0f1117;
+      padding: 2px 10px;
+      border-radius: 6px;
+      border: 1px dashed #333;
+      max-width: 180px;
+      text-align: center;
+    }
+    .arrow-label-left {
+      left: calc(50% - 200px);
+      right: auto;
+    }
+
+    /* Conditional branch visual */
+    .branch-section {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 60px;
+      width: 100%;
+      position: relative;
+      margin: 10px 0;
+    }
+    .branch-path {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+    .branch-label {
+      font-size: 0.72rem;
+      color: #ef4444;
+      padding: 4px 12px;
+      border: 1px dashed #ef4444;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      background: rgba(239,68,68,0.08);
+    }
+
+    /* Retriever tools detail */
+    .tools-detail {
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .tool-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 10px 14px;
+      text-align: center;
+      width: 160px;
+    }
+    .tool-card .tool-name {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #34d399;
+      margin-bottom: 4px;
+    }
+    .tool-card .tool-src {
+      font-size: 0.65rem;
+      color: #888;
+    }
+
+    /* Legend */
+    .legend {
+      margin-top: 50px;
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      color: #aaa;
+    }
+    .legend-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+    }
+
+    .diamond {
+      width: 28px; height: 28px;
+      background: #1a1d2e;
+      border: 2px solid #f59e0b;
+      transform: rotate(45deg);
+      margin: 0 auto 8px;
+    }
+    .diamond-label {
+      font-size: 0.72rem;
+      color: #fbbf24;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Multi-Agent Research Assistant</h1>
+  <p class="subtitle">LangGraph Orchestrated &middot; Handoff-based Routing &middot; Databricks-native</p>
+
+  <div class="diagram">
+
+    <!-- START -->
+    <div class="node node-start">
+      <div class="label">START</div>
+      <div class="desc">User Query</div>
+    </div>
+
+    <div class="arrow-container">
+      <div class="arrow-line"></div>
+      <div class="arrow-head"></div>
+      <div class="arrow-label arrow-label-left">always</div>
+    </div>
+
+    <!-- VALIDATOR AGENT -->
+    <div class="node node-validator">
+      <div class="label">Validator Agent</div>
+      <div class="desc">Validates company exists in the knowledge base using Unity Catalog lookup functions</div>
+      <div class="tools-panel">
+        <span class="tool-chip">lookup_company_info_by_name</span>
+        <span class="tool-chip">lookup_company_info_by_ticker</span>
+        <span class="tool-chip">transfer_to_planner_agent</span>
+      </div>
+    </div>
+
+    <!-- Conditional branch -->
+    <div class="arrow-container" style="height: 50px;">
+      <div class="arrow-line"></div>
+      <div class="arrow-head"></div>
+    </div>
+
+    <div style="text-align:center; margin-bottom: 4px;">
+      <div class="diamond"></div>
+      <div class="diamond-label">route_after_agent()</div>
+    </div>
+
+    <div class="branch-section">
+      <!-- Left branch: END -->
+      <div class="branch-path">
+        <div class="branch-label">no handoff detected</div>
+        <div class="node node-end" style="width: 200px;">
+          <div class="label">END</div>
+          <div class="desc">Ask user to verify company</div>
+        </div>
+      </div>
+
+      <!-- Right branch: Planner -->
+      <div class="branch-path">
+        <div class="arrow-label" style="position: static; transform: none; margin-bottom: 10px; color: #22d3ee; border-color: #22d3ee; background: rgba(6,182,212,0.08);">transfer_to_planner_agent</div>
+
+        <div class="node node-planner">
+          <div class="label">Planner Agent</div>
+          <div class="desc">Creates a structured research plan mapping questions to data sources and search strategies</div>
+          <div class="tools-panel">
+            <span class="tool-chip">transfer_to_document_retrieval_agent</span>
+          </div>
+        </div>
+
+        <div class="arrow-container" style="height: 50px;">
+          <div class="arrow-line"></div>
+          <div class="arrow-head"></div>
+        </div>
+
+        <div style="text-align:center; margin-bottom: 4px;">
+          <div class="diamond"></div>
+          <div class="diamond-label">route_after_agent()</div>
+        </div>
+
+        <div class="arrow-container" style="height: 30px;">
+          <div class="arrow-label" style="position: static; transform: none; color: #34d399; border-color: #34d399; background: rgba(16,185,129,0.08); margin-bottom: 0;">transfer_to_document_retrieval_agent</div>
+        </div>
+
+        <div class="arrow-container" style="height: 30px;">
+          <div class="arrow-line"></div>
+          <div class="arrow-head"></div>
+        </div>
+
+        <!-- DOCUMENT RETRIEVAL AGENT -->
+        <div class="node node-retrieval" style="width: 380px;">
+          <div class="label">Document Retrieval Agent</div>
+          <div class="desc">Executes research plan by searching across multiple data sources in parallel, then synthesizes findings into a final answer</div>
+        </div>
+
+        <!-- Tool cards -->
+        <div class="tools-detail">
+          <div class="tool-card">
+            <div class="tool-name">search_sec_business_section</div>
+            <div class="tool-src">SEC 10-K Business<br>Self-Query Retriever + Vector Search</div>
+          </div>
+          <div class="tool-card">
+            <div class="tool-name">search_sec_other_sections</div>
+            <div class="tool-src">SEC 10-K Risks / Legal<br>Self-Query Retriever + Vector Search</div>
+          </div>
+          <div class="tool-card">
+            <div class="tool-name">search_earnings_calls</div>
+            <div class="tool-src">Earnings Transcripts<br>Self-Query Retriever + Vector Search</div>
+          </div>
+        </div>
+
+        <div class="arrow-container" style="height: 50px;">
+          <div class="arrow-line"></div>
+          <div class="arrow-head"></div>
+          <div class="arrow-label arrow-label-left">always</div>
+        </div>
+
+        <div class="node node-response">
+          <div class="label">Final Response</div>
+          <div class="desc">Synthesized answer returned to the user</div>
+        </div>
+
+        <div class="arrow-container" style="height: 40px;">
+          <div class="arrow-line"></div>
+          <div class="arrow-head"></div>
+        </div>
+
+        <div class="node node-end">
+          <div class="label">END</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-dot" style="background: #8b5cf6;"></div>
+      Validator (Claude 3.7 Sonnet)
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background: #06b6d4;"></div>
+      Planner (Claude Sonnet 4)
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background: #10b981;"></div>
+      Retrieval (Claude Sonnet 4)
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background: #f59e0b;"></div>
+      Decision Point
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background: #3b82f6;"></div>
+      Start / End
+    </div>
+  </div>
+
+</body>
+</html>
